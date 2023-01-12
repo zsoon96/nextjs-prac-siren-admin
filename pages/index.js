@@ -1,12 +1,25 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Fragment} from 'react';
 import BaseLayout from "../components/container/BaseLayout";
 import Head from "next/head";
 import firebaseApp from "../net/firebaseApp";
 import {collection, getFirestore, onSnapshot} from 'firebase/firestore'
+import {Select, Table} from "antd";
+import {DateTime} from 'luxon'
 
 
 const firebaseDb = getFirestore(firebaseApp)
 const orders = collection(firebaseDb, 'orders')
+
+const formatter = Intl.NumberFormat('ko-kr');
+
+// 합계 산출 함수
+// you might not need/lodash > lodash에서 제공하는 sum함수를 js로 변환한 코드 활용
+const sum = (array) => {
+    return array.reduce((acc, num) => {
+        acc += num
+        return acc
+    }, 0)
+}
 
 export default function Home() {
     const [list, setList] = useState([])
@@ -15,11 +28,62 @@ export default function Home() {
     useEffect(() => {
         return onSnapshot(orders, docs => {
             // setList(docs.map(doc => ({id: doc.id, ...doc.data()})))
-            const newList=[];
+            const newList = [];
             docs.forEach(doc => newList.push({id: doc.id, ...doc.data()}))
             setList(newList)
         })
     }, [])
+
+    // title: 테이블 헤더에 표시되는 내용
+    // dataIndex: dataSource에서 맵핑할 필드명
+    // key: 맵핑될 각 컬럼에 대한 key
+    const columns = [
+        {
+            title: '이름',
+            dataIndex: 'name',
+            key: 'name',
+        },
+        {
+            title: '주문 내역',
+            dataIndex: 'items',
+            key: 'items',
+            // render를 통해 데이터 파싱
+            render: (text, record) => {
+                return <div>
+                    <ul>
+                        {record.items.map(item => (<Fragment key={item.name}>
+                            <li>{item.name} {formatter.format(item.price)}원 &times; {item.count}</li>
+                        </Fragment>))}
+                    </ul>
+                    <div>
+                        합계: {formatter.format(sum(record.items.map(item => item.price * item.count)))}원
+                    </div>
+                </div>
+            }
+        },
+        {
+            title: '주문 상태',
+            dataIndex: 'status',
+            key: 'status',
+            render: (text) => {
+                return <Select value={text}>
+                    <Select.Option value='주문 완료'>주문 완료</Select.Option>
+                    <Select.Option value='제조중'>제조중</Select.Option>
+                    <Select.Option value='제조 완료'>제조 완료</Select.Option>
+                    <Select.Option value='픽업 완료'>픽업 완료</Select.Option>
+                </Select>
+            }
+        },
+        {
+            title: '주문 시간',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            // render를 통해 데이터 형식 변경
+            render: (text, record) => {
+                return DateTime.fromSeconds(record.createdAt.seconds).toFormat('yyyy-LL-dd HH:mm');
+            }
+        },
+    ];
 
     return (
         <BaseLayout>
@@ -30,9 +94,8 @@ export default function Home() {
             </Head>
             <h1>주문 확인</h1>
 
-            {list.map(order => (
-                <li key={order.id}>{order.name} / {JSON.stringify(order.items)} / {order.status}</li>
-            ))}
+            {/* 해당 테이블에 대한 세부적인 커스텀 불가 */}
+            <Table dataSource={list} columns={columns} rowKey={'id'}/>
         </BaseLayout>
     )
 }
