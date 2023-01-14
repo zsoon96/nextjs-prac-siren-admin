@@ -2,7 +2,7 @@ import React, {useEffect, useState, Fragment} from 'react';
 import BaseLayout from "../components/container/BaseLayout";
 import Head from "next/head";
 import firebaseApp from "../net/firebaseApp";
-import {collection, getFirestore, onSnapshot} from 'firebase/firestore'
+import {collection, getFirestore, onSnapshot, doc, updateDoc} from 'firebase/firestore'
 import {Select, Table} from "antd";
 import {DateTime} from 'luxon'
 
@@ -65,8 +65,12 @@ export default function Home() {
             title: '주문 상태',
             dataIndex: 'status',
             key: 'status',
-            render: (text) => {
-                return <Select value={text}>
+            render: (text, record) => {
+                return <Select value={text} onChange={value => {
+                    // 상태 데이터 변경 > 스냅샷 > 변경된 데이터 렌더링 (실시간 반영)
+                    updateDoc(doc(firebaseDb, 'orders', record.id), {status: value})
+                }
+                }>
                     <Select.Option value='주문 완료'>주문 완료</Select.Option>
                     <Select.Option value='제조중'>제조중</Select.Option>
                     <Select.Option value='제조 완료'>제조 완료</Select.Option>
