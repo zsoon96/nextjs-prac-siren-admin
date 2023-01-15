@@ -3,7 +3,7 @@ import BaseLayout from "../components/container/BaseLayout";
 import Head from "next/head";
 import firebaseApp from "../net/firebaseApp";
 import {collection, getFirestore, onSnapshot, doc, updateDoc, query, orderBy} from 'firebase/firestore'
-import {Select, Table} from "antd";
+import {Button, Select, Table} from "antd";
 import {DateTime} from 'luxon'
 
 
@@ -67,16 +67,42 @@ export default function Home() {
             dataIndex: 'status',
             key: 'status',
             render: (text, record) => {
-                return <Select value={text} onChange={value => {
-                    // 상태 데이터 변경 > 스냅샷 > 변경된 데이터 렌더링 (실시간 반영)
-                    updateDoc(doc(firebaseDb, 'orders', record.id), {status: value})
-                }
-                }>
-                    <Select.Option value='주문 완료'>주문 완료</Select.Option>
-                    <Select.Option value='제조중'>제조중</Select.Option>
-                    <Select.Option value='제조 완료'>제조 완료</Select.Option>
-                    <Select.Option value='픽업 완료'>픽업 완료</Select.Option>
-                </Select>
+                return <>
+                    <Button
+                        type={text === '주문 완료' ? 'primary' : ''}
+                        onClick={() => updateDoc(doc(firebaseDb, 'orders', record.id), {status: '주문 완료'})}
+                    >
+                        주문 완료
+                    </Button>
+                    <Button
+                        type={text === '제조중' ? 'primary' : ''}
+                        onClick={() => updateDoc(doc(firebaseDb, 'orders', record.id), {status: '제조중'})}
+                    >
+                        제조중
+                    </Button>
+                    <Button
+                        type={text === '제조 완료' ? 'primary' : ''}
+                        onClick={() => updateDoc(doc(firebaseDb, 'orders', record.id), {status: '제조 완료'})}
+                    >
+                        제조 완료
+                    </Button>
+                    <Button
+                        type={text === '픽업 완료' ? 'primary' : ''}
+                        onClick={() => updateDoc(doc(firebaseDb, 'orders', record.id), {status: '픽업 완료'})}
+                    >
+                        픽업 완료
+                    </Button>
+                </>
+                // return <Select value={text} onChange={value => {
+                //     // 상태 데이터 변경 > 스냅샷 > 변경된 데이터 렌더링 (실시간 반영)
+                //     updateDoc(doc(firebaseDb, 'orders', record.id), {status: value})
+                // }
+                // }>
+                //     <Select.Option value='주문 완료'>주문 완료</Select.Option>
+                //     <Select.Option value='제조중'>제조중</Select.Option>
+                //     <Select.Option value='제조 완료'>제조 완료</Select.Option>
+                //     <Select.Option value='픽업 완료'>픽업 완료</Select.Option>
+                // </Select>
             }
         },
         {
