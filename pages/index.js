@@ -2,13 +2,14 @@ import React, {useEffect, useState, Fragment} from 'react';
 import BaseLayout from "../components/container/BaseLayout";
 import Head from "next/head";
 import firebaseApp from "../net/firebaseApp";
-import {collection, getFirestore, onSnapshot, doc, updateDoc} from 'firebase/firestore'
+import {collection, getFirestore, onSnapshot, doc, updateDoc, query, orderBy} from 'firebase/firestore'
 import {Select, Table} from "antd";
 import {DateTime} from 'luxon'
 
 
 const firebaseDb = getFirestore(firebaseApp)
 const orders = collection(firebaseDb, 'orders')
+const q = query(orders, orderBy('createdAt', 'desc'))
 
 const formatter = Intl.NumberFormat('ko-kr');
 
@@ -26,7 +27,7 @@ export default function Home() {
 
     // onSnapshot을 활용한 실시간 데이터 연동
     useEffect(() => {
-        return onSnapshot(orders, docs => {
+        return onSnapshot(q, docs => {
             // setList(docs.map(doc => ({id: doc.id, ...doc.data()})))
             const newList = [];
             docs.forEach(doc => newList.push({id: doc.id, ...doc.data()}))
