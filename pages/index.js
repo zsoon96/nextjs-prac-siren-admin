@@ -56,10 +56,19 @@ export default function Home() {
                             <li>{item.name} {formatter.format(item.price)}원 &times; {item.count}</li>
                         </Fragment>))}
                     </ul>
-                    <div>
-                        합계: {formatter.format(sum(record.items.map(item => item.price * item.count)))}원
-                    </div>
                 </div>
+            }
+        },
+        {
+            title: '합계 금액',
+            dataIndex: 'items',
+            key: 'total',
+            render: (text, record) => {
+                return (
+                    <div>
+                        {formatter.format(sum(record.items.map(item => item.price * item.count)))}원
+                    </div>
+                )
             }
         },
         {
