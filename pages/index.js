@@ -1,15 +1,15 @@
-import React, {useEffect, useState, Fragment} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import BaseLayout from "../components/container/BaseLayout";
 import Head from "next/head";
 import firebaseApp from "../net/firebaseApp";
-import {collection, getFirestore, onSnapshot, doc, updateDoc, query, orderBy} from 'firebase/firestore'
-import {Button, Select, Table} from "antd";
+import {collection, doc, getFirestore, onSnapshot, orderBy, query, updateDoc, where} from 'firebase/firestore'
+import {Button, Table} from "antd";
 import {DateTime} from 'luxon'
 
 
 const firebaseDb = getFirestore(firebaseApp)
 const orders = collection(firebaseDb, 'orders')
-const q = query(orders, orderBy('createdAt', 'desc'))
+const q = query(orders, where( 'status', '==', '주문 완료'), orderBy('createdAt', 'desc'))
 
 const formatter = Intl.NumberFormat('ko-kr');
 
